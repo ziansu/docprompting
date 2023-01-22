@@ -113,7 +113,7 @@ class CLTrainer(Trainer):
             shutil.copyfile(src_r_file, tgt_r_file)
             logger.info(f"copy the best file from {src_r_file} to {tgt_r_file}")
 
-    def evaluate(self) -> Dict[str, float]:
+    def evaluate(self, **kwargs) -> Dict[str, float]:
         """use the same full retrieval pool for validation.
         The function calls run_inference.py to have the exact same validation procedure as the inference."""
 
