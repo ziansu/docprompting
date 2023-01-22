@@ -74,7 +74,7 @@ if version.parse(torch.__version__) >= version.parse("1.6"):
 if is_datasets_available():
     import datasets
 
-from transformers.trainer import _model_unwrap
+from transformers.trainer import unwrap_model as _model_unwrap
 from transformers.optimization import Adafactor, AdamW, get_scheduler
 import copy
 
@@ -165,7 +165,7 @@ class CLTrainer(Trainer):
                             eval_config.target_idx_file, eval_config.top_k, eval_config.save_file)
 
                 metrics_1 = metric_func(
-                    f"{self.args.eval_oracle_file}",
+                    f"{eval_config.root_folder}/{self.args.eval_oracle_file}",
                     eval_config.save_file)
 
                 if flag == 'recall':
@@ -355,7 +355,7 @@ class CLTrainer(Trainer):
             model = torch.nn.DataParallel(model)
 
         # Distributed training (should be after apex fp16 initialization)
-        if self.sharded_dpp:
+        if self.sharded_ddp:
             model = ShardedDDP(model, self.optimizer)
         elif self.args.local_rank != -1:
             model = torch.nn.parallel.DistributedDataParallel(

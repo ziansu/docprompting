@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.append(os.getcwd())
+
 import json
 import os.path
 import pickle
@@ -166,9 +170,29 @@ def config(in_program_call=None):
     print(json.dumps(vars(args), indent=2))
     return args
 
+
+def rename_and_save_params(model_path):
+    "fix parameter name unmatching problem"
+    if model_path.startswith("models"):
+        from collections import OrderedDict
+        state_dict = torch.load(os.path.join(model_path, 'pytorch_model.bin'))
+        new_state_dict = OrderedDict()
+        for key in state_dict.keys():
+            if not key.startswith("_model"):
+                print("Corrent parameter names for model '{}'.".format(model_path))
+                return
+            new_key = key.replace("_model.", "")
+            new_state_dict[new_key] = state_dict[key]
+        torch.save(state_dict, os.path.join(model_path, 'pytorch_model.bin.old'))
+        # torch.save(new_state_dict, os.path.join(model_path, 'pytorch_model.bin.new'))   # debug
+        torch.save(new_state_dict, os.path.join(model_path, 'pytorch_model.bin'))
+
+
 if __name__ == "__main__":
     args = config()
 
+    rename_and_save_params(args.model_name)
+    
     searcher = CodeT5Retriever(args)
     searcher.prepare_model()
     searcher.encode_file(args.source_file, args.source_embed_save_file, normalize_embed=args.normalize_embed)
@@ -180,5 +204,7 @@ if __name__ == "__main__":
     flag = 'recall'
     top_n = 10
     m1 = eval_retrieval_from_file(args.oracle_eval_file, args.save_file)
+
+    print(m1)
 
 
