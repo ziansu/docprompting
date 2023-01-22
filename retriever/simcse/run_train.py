@@ -178,6 +178,7 @@ def main():
     trainer.model_args = model_args
     trainer.epoch_metric = {}
     trainer.metric_for_best_model = training_args.metric_for_best_model
+    trainer.use_amp = False
     training_args.do_eval = False
 
     # Training
